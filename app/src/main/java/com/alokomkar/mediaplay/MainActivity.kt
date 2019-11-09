@@ -13,12 +13,10 @@ class MainActivity : AppCompatActivity(), MediaInfoListAdapter.ItemClickListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
-            val listFragment = supportFragmentManager.findFragmentByTag("ListScreen") ?: ListFragment()
             supportFragmentManager.beginTransaction().apply {
+                replace(R.id.container, ListFragment())
                 addToBackStack("ListScreen")
-            }
-                .replace(R.id.container, listFragment)
-                .commit()
+            }.commit()
         }
     }
 
@@ -34,11 +32,7 @@ class MainActivity : AppCompatActivity(), MediaInfoListAdapter.ItemClickListener
     }
 
     override fun onBackPressed() {
-        if( supportFragmentManager.backStackEntryCount > 1 ) {
-            supportFragmentManager.popBackStack()
-        }
-        else
-            super.onBackPressed()
+        finish()
     }
 
 }

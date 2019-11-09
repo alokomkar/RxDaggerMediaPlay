@@ -28,6 +28,11 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_list.*
 import javax.inject.Inject
+import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray
+import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.Timeline
 
 
 class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
@@ -108,6 +113,7 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         Log.d("ListScreen", "play Media : $data")
         exoPlayer.release()
         exoPlayer.apply {
+            addListener(eventListener)
             prepare(ExtractorMediaSource(
                 Uri.parse(data),
                 dataSourceFactory,
@@ -138,5 +144,44 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         //Not working as response is required in JSON Format
         //viewModel.resolveShortUrl(item.url)
         //onItemSelection.onItemClicked(item)
+    }
+
+    private val eventListener = object : ExoPlayer.EventListener {
+        override fun onTimelineChanged(timeline: Timeline, manifest: Any) {
+        }
+
+        override fun onTracksChanged(
+            trackGroups: TrackGroupArray,
+            trackSelections: TrackSelectionArray
+        ) {
+        }
+
+        override fun onLoadingChanged(isLoading: Boolean) {
+        }
+
+        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+
+            when (playbackState) {
+                ExoPlayer.STATE_ENDED -> {
+                    exoPlayer.playWhenReady = false
+                    exoPlayer.seekTo(0)
+                }
+                ExoPlayer.STATE_READY -> {
+
+                }
+                ExoPlayer.STATE_BUFFERING -> {
+                }
+                ExoPlayer.STATE_IDLE -> {
+                }
+            }
+        }
+
+        override fun onPlayerError(error: ExoPlaybackException) {
+
+        }
+
+        override fun onPositionDiscontinuity() {
+
+        }
     }
 }
