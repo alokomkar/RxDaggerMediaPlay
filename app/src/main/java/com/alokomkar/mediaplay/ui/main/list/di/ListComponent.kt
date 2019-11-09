@@ -11,6 +11,7 @@ import com.alokomkar.mediaplay.ui.di.PlayerModule
 import com.alokomkar.mediaplay.ui.main.list.ListFragment
 import com.alokomkar.mediaplay.ui.main.list.MediaInfoListAdapter
 import com.alokomkar.mediaplay.ui.main.list.model.ListDataContract
+import com.alokomkar.mediaplay.ui.main.list.model.ListLocalData
 import com.alokomkar.mediaplay.ui.main.list.model.ListRemoteData
 import com.alokomkar.mediaplay.ui.main.list.model.ListRepository
 import com.alokomkar.mediaplay.ui.main.list.viewmodel.ListViewModelFactory
@@ -48,7 +49,7 @@ class ListModule {
     /*Repository*/
     @Provides
     @ListScope
-    fun listRepo(remote: ListDataContract.Remote, scheduler: Scheduler, compositeDisposable: CompositeDisposable): ListDataContract.Repository = ListRepository(remote, scheduler, compositeDisposable)
+    fun listRepo(remote: ListDataContract.Remote, local: ListDataContract.Local, scheduler: Scheduler, compositeDisposable: CompositeDisposable): ListDataContract.Repository = ListRepository(remote, local, scheduler, compositeDisposable)
 
     @Provides
     @ListScope
@@ -57,6 +58,10 @@ class ListModule {
     @Provides
     @ListScope
     fun compositeDisposable(): CompositeDisposable = CompositeDisposable()
+
+    @Provides
+    @ListScope
+    fun localData(mediaDb: MediaDb, scheduler: Scheduler): ListDataContract.Local = ListLocalData(mediaDb, scheduler)
 
     @Provides
     @ListScope

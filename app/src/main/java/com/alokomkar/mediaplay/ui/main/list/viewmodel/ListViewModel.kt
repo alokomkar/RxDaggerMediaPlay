@@ -37,4 +37,8 @@ class ListViewModel(private val repo: ListDataContract.Repository,
         ComponentHolder.destroyListComponent()
     }
 
+    fun updateMedia(item: MediaInfo) {
+        repo.updateMedia(item)
+    }
+
 }

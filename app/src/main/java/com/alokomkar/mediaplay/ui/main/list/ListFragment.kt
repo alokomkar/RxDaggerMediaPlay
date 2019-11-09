@@ -126,6 +126,7 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
             webView.webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String) {
                     item.expandedUrl = webView.url
+                    viewModel.updateMedia(item)
                     playMedia(webView.url)
                 }
             }

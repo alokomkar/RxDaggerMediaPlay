@@ -30,6 +30,10 @@ or
 
 Download the project from github link : https://github.com/alokomkar/RxDaggerMediaPlay/archive/master.zip
 
+Network Response :
+
+The network response has been put in sample_response.json
+
 
 
 
