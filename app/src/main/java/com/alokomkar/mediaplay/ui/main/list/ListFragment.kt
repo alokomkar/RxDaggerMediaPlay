@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -77,11 +78,27 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         rvMedia.adapter = adapter
 
         viewModel.getMedia()
+        scheduleRefreshLayout.isRefreshing = true
         scheduleRefreshLayout.setOnRefreshListener { viewModel.getMedia() }
 
         initialiseDataListener()
+
+        fabPlayPause.isEnabled = false
+        fabPlayPause.alpha = 0.5f
+
         fabPlayPause.setOnClickListener {
-            showToast(R.string.to_de_done)
+            if( selectedItem == null ) {
+                selectedItem = adapter.getItemAtPosition(0)
+            }
+            if( exoPlayer.playbackState == ExoPlayer.STATE_READY && exoPlayer.playWhenReady ) {
+                exoPlayer.playWhenReady = false
+                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_play))
+            }
+            else {
+                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+                exoPlayer.playWhenReady = true
+                selectedItem?.let { onItemClicked(it) }
+            }
         }
 
     }
@@ -92,6 +109,10 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
 
     private fun initialiseDataListener() {
         viewModel.mediaListResponse.observe(this, Observer { response ->
+
+            fabPlayPause.alpha = if( response is Response.Success ) 1.0f else 0.5f
+            fabPlayPause.isEnabled = response is Response.Success
+
             when( response ) {
                 is Response.Progress -> scheduleRefreshLayout.isRefreshing = response.loading
                 is Response.Success -> adapter.swapData(response.data)
@@ -128,6 +149,7 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
     override fun onItemClicked(item: MediaInfo) {
         selectedItem = item
         if( item.expandedUrl.isEmpty() ) {
+            showToast(R.string.loading)
             webView.loadUrl(item.url)
             webView.webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String) {
@@ -167,7 +189,6 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
                     exoPlayer.seekTo(0)
                 }
                 ExoPlayer.STATE_READY -> {
-
                 }
                 ExoPlayer.STATE_BUFFERING -> {
                 }

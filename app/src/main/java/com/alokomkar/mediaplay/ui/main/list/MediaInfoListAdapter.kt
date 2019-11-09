@@ -29,6 +29,10 @@ class MediaInfoListAdapter(private val picasso: Picasso ) : ListAdapter<MediaInf
         submitList(data.toMutableList())
     }
 
+    fun getItemAtPosition(position: Int): MediaInfo {
+        return getItem(position)
+    }
+
     interface ItemClickListener {
         fun onItemClicked( item : MediaInfo)
     }
