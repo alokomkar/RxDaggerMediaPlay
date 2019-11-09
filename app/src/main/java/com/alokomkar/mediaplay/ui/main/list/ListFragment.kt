@@ -29,11 +29,6 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_list.*
 import javax.inject.Inject
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.Timeline
 
 
 class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
@@ -73,6 +68,7 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         component.inject(this)
         adapter.itemClickListener = this
         rvMedia.adapter = adapter
@@ -87,20 +83,28 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         fabPlayPause.alpha = 0.5f
 
         fabPlayPause.setOnClickListener {
-            if( selectedItem == null ) {
-                selectedItem = adapter.getItemAtPosition(0)
-            }
-            if( exoPlayer.playbackState == ExoPlayer.STATE_READY && exoPlayer.playWhenReady ) {
-                exoPlayer.playWhenReady = false
-                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_play))
-            }
-            else {
-                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
-                exoPlayer.playWhenReady = true
-                selectedItem?.let { onItemClicked(it) }
-            }
+            togglePlayPause()
         }
 
+    }
+
+    private fun togglePlayPause() {
+
+        if( selectedItem == null ) {
+            selectedItem = adapter.getItemAtPosition(0)
+            selectedItem?.let { onItemClicked(it) }
+            fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+            return
+        }
+        else {
+            exoPlayer.playWhenReady = !exoPlayer.playWhenReady
+            if( exoPlayer.playWhenReady ) {
+                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+            }
+            else {
+                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_play))
+            }
+        }
     }
 
     private fun showToast(message: Int) {
@@ -134,75 +138,32 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         Log.d("ListScreen", "play Media : $data")
         exoPlayer.release()
         exoPlayer.apply {
-            addListener(eventListener)
             prepare(ExtractorMediaSource(
                 Uri.parse(data),
                 dataSourceFactory,
                 extractorsFactory,
                 null,
                 null))
-            playWhenReady = true
+            playWhenReady = !playWhenReady
         }
     }
 
-    @Synchronized
     override fun onItemClicked(item: MediaInfo) {
         selectedItem = item
-        if( item.expandedUrl.isEmpty() ) {
-            showToast(R.string.loading)
-            webView.loadUrl(item.url)
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    item.expandedUrl = webView.url
-                    viewModel.updateMedia(item)
-                    playMedia(webView.url)
-                }
+        showToast(R.string.loading)
+        webView.loadUrl(item.url)
+        fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String) {
+                item.expandedUrl = webView.url
+                viewModel.updateMedia(item)
+                playMedia(webView.url)
             }
         }
-        else{
-            playMedia(item.expandedUrl)
-        }
-
         //Not working as response is required in JSON Format
         //viewModel.resolveShortUrl(item.url)
         //onItemSelection.onItemClicked(item)
     }
 
-    private val eventListener = object : ExoPlayer.EventListener {
-        override fun onTimelineChanged(timeline: Timeline, manifest: Any) {
-        }
-
-        override fun onTracksChanged(
-            trackGroups: TrackGroupArray,
-            trackSelections: TrackSelectionArray
-        ) {
-        }
-
-        override fun onLoadingChanged(isLoading: Boolean) {
-        }
-
-        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-
-            when (playbackState) {
-                ExoPlayer.STATE_ENDED -> {
-                    exoPlayer.playWhenReady = false
-                    exoPlayer.seekTo(0)
-                }
-                ExoPlayer.STATE_READY -> {
-                }
-                ExoPlayer.STATE_BUFFERING -> {
-                }
-                ExoPlayer.STATE_IDLE -> {
-                }
-            }
-        }
-
-        override fun onPlayerError(error: ExoPlaybackException) {
-
-        }
-
-        override fun onPositionDiscontinuity() {
-
-        }
-    }
 }
