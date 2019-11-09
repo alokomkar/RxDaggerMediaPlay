@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MediaPlay</string>
+    <string name="description">Media Description</string>
+    <string name="to_de_done">To be done</string>
+    <string name="album_art">album art</string>
+    <string name="loading">Loading</string>
+</resources>
