@@ -16,10 +16,14 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".service.MediaPlayService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

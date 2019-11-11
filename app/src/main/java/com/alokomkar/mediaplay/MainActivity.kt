@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.alokomkar.mediaplay.commons.ComponentHolder
 import com.alokomkar.mediaplay.ui.main.data.MediaInfo
@@ -19,7 +18,6 @@ import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.extractor.ExtractorsFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import kotlinx.android.synthetic.main.fragment_list.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MediaInfoListAdapter.ItemClickListener, MediaPlayerControls {
@@ -64,9 +62,8 @@ class MainActivity : AppCompatActivity(), MediaInfoListAdapter.ItemClickListener
     }
 
     override fun playMedia(mediaInfo: MediaInfo) {
+        exoPlayer.playWhenReady = false
         webView.loadUrl(mediaInfo.url)
-        fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
-
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 mediaInfo.expandedUrl = webView.url
@@ -110,7 +107,7 @@ class MainActivity : AppCompatActivity(), MediaInfoListAdapter.ItemClickListener
                     null,
                     null)
             )
-            playWhenReady = !playWhenReady
+            playWhenReady = true
         }
     }
 
