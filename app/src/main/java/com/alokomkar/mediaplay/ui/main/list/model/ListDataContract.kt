@@ -2,7 +2,6 @@ package com.alokomkar.mediaplay.ui.main.list.model
 
 import com.alokomkar.core.networking.Response
 import com.alokomkar.mediaplay.ui.main.data.MediaInfo
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
@@ -14,7 +13,6 @@ interface ListDataContract {
         val urlResolverResponse : PublishSubject<Response<String>>
         fun fetchAllMedia()
         fun saveAllMedia( mediaList : List<MediaInfo> )
-        fun updateMedia( mediaInfo: MediaInfo )
         fun resolveShortUrl( shortUrl: String )
         fun handleError( error : Throwable )
     }
@@ -22,7 +20,6 @@ interface ListDataContract {
     interface Local {
         fun saveLocalMedia(list : List<MediaInfo>)
         fun getLocalMedia(): Flowable<List<MediaInfo>>
-        fun updateItem( mediaInfo: MediaInfo )
     }
 
     interface Remote {

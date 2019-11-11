@@ -1,14 +1,10 @@
 package com.alokomkar.mediaplay.ui.main.list
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,17 +12,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.alokomkar.core.extensions.handleFailures
 import com.alokomkar.core.networking.Response
-import com.alokomkar.mediaplay.BuildConfig
+import com.alokomkar.mediaplay.MediaPlayerControls
 import com.alokomkar.mediaplay.R
 import com.alokomkar.mediaplay.commons.ComponentHolder
 import com.alokomkar.mediaplay.ui.main.data.MediaInfo
 import com.alokomkar.mediaplay.ui.main.list.viewmodel.ListViewModel
 import com.alokomkar.mediaplay.ui.main.list.viewmodel.ListViewModelFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-import com.google.android.exoplayer2.extractor.ExtractorsFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_list.*
 import javax.inject.Inject
 
@@ -38,10 +29,9 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
     lateinit var viewModelFactory: ListViewModelFactory
     @Inject
     lateinit var adapter: MediaInfoListAdapter
-    @Inject
-    lateinit var exoPlayer: SimpleExoPlayer
 
     private lateinit var onItemSelection: MediaInfoListAdapter.ItemClickListener
+    private lateinit var mediaPlayerControls: MediaPlayerControls
 
     private val viewModel: ListViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(ListViewModel::class.java)
@@ -49,14 +39,13 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
 
     private var selectedItem : MediaInfo ?= null
 
-    private val dataSourceFactory by lazy { DefaultDataSourceFactory(context, "${BuildConfig.APPLICATION_ID}.AudioPlayer") }
-    private val extractorsFactory : ExtractorsFactory by lazy { DefaultExtractorsFactory() }
-    private val webView by lazy { WebView(context) }
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if( context is MediaInfoListAdapter.ItemClickListener ) {
             onItemSelection = context
+        }
+        if( context is MediaPlayerControls ) {
+            mediaPlayerControls = context
         }
     }
 
@@ -97,13 +86,17 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
             return
         }
         else {
-            exoPlayer.playWhenReady = !exoPlayer.playWhenReady
-            if( exoPlayer.playWhenReady ) {
-                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+            selectedItem?.let { item ->
+                if( !mediaPlayerControls.isPlaying() ) {
+                    fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+                    mediaPlayerControls.playMedia(item)
+                }
+                else {
+                    fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_play))
+                    mediaPlayerControls.pauseMedia()
+                }
             }
-            else {
-                fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_play))
-            }
+
         }
     }
 
@@ -134,33 +127,13 @@ class ListFragment : Fragment(), MediaInfoListAdapter.ItemClickListener {
         })*/
     }
 
-    private fun playMedia(data: String) {
-        Log.d("ListScreen", "play Media : $data")
-        exoPlayer.release()
-        exoPlayer.apply {
-            prepare(ExtractorMediaSource(
-                Uri.parse(data),
-                dataSourceFactory,
-                extractorsFactory,
-                null,
-                null))
-            playWhenReady = !playWhenReady
-        }
-    }
+
 
     override fun onItemClicked(item: MediaInfo) {
         selectedItem = item
         showToast(R.string.loading)
-        webView.loadUrl(item.url)
-        fabPlayPause.setImageDrawable(ContextCompat.getDrawable(fabPlayPause.context, android.R.drawable.ic_media_pause))
+        mediaPlayerControls.playMedia(item)
 
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String) {
-                item.expandedUrl = webView.url
-                viewModel.updateMedia(item)
-                playMedia(webView.url)
-            }
-        }
         //Not working as response is required in JSON Format
         //viewModel.resolveShortUrl(item.url)
         //onItemSelection.onItemClicked(item)

@@ -18,13 +18,7 @@ class ListLocalData(private val mediaDb : MediaDb, private val scheduler: Schedu
 
     }
 
-    override fun updateItem(mediaInfo: MediaInfo) {
-        Completable.fromAction {
-            mediaDb.mediaInfoDao().updateMedia(mediaInfo)
-        }
-            .performOnBack(scheduler)
-            .subscribe()
-    }
+
 
     override fun getLocalMedia(): Flowable<List<MediaInfo>>
             = mediaDb.mediaInfoDao().getAll()

@@ -1,7 +1,6 @@
 package com.alokomkar.mediaplay.ui.di
 
 import android.content.Context
-import com.alokomkar.mediaplay.ui.main.list.di.ListScope
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.LoadControl
@@ -15,15 +14,15 @@ import dagger.Provides
 class PlayerModule {
 
     @Provides
-    @ListScope
+    @MainActivityScope
     fun providesTrackSelector() : TrackSelector = DefaultTrackSelector()
 
     @Provides
-    @ListScope
+    @MainActivityScope
     fun providesLoadControl() : LoadControl = DefaultLoadControl()
 
     @Provides
-    @ListScope
+    @MainActivityScope
     fun exoPlayer(context: Context, trackSelector: TrackSelector, loadControl : LoadControl ): SimpleExoPlayer
             = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl)
 

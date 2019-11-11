@@ -18,10 +18,6 @@ class ListRepository(
         local.saveLocalMedia(mediaList)
     }
 
-    override fun updateMedia(mediaInfo: MediaInfo) {
-        local.updateItem(mediaInfo)
-    }
-
     override val mediaListResponse: PublishSubject<Response<List<MediaInfo>>>
             =  PublishSubject.create<Response<List<MediaInfo>>>()
 

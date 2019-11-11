@@ -7,7 +7,6 @@ import com.alokomkar.core.networking.Scheduler
 import com.alokomkar.mediaplay.BuildConfig
 import com.alokomkar.mediaplay.commons.local.MediaDb
 import com.alokomkar.mediaplay.commons.remote.MediaAPIService
-import com.alokomkar.mediaplay.ui.di.PlayerModule
 import com.alokomkar.mediaplay.ui.main.list.ListFragment
 import com.alokomkar.mediaplay.ui.main.list.MediaInfoListAdapter
 import com.alokomkar.mediaplay.ui.main.list.model.ListDataContract
@@ -15,7 +14,6 @@ import com.alokomkar.mediaplay.ui.main.list.model.ListLocalData
 import com.alokomkar.mediaplay.ui.main.list.model.ListRemoteData
 import com.alokomkar.mediaplay.ui.main.list.model.ListRepository
 import com.alokomkar.mediaplay.ui.main.list.viewmodel.ListViewModelFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.squareup.picasso.Picasso
 import dagger.Component
 import dagger.Module
@@ -24,10 +22,9 @@ import io.reactivex.disposables.CompositeDisposable
 import retrofit2.Retrofit
 
 @ListScope
-@Component(dependencies = [CoreComponent::class], modules = [ListModule::class, PlayerModule::class])
+@Component(dependencies = [CoreComponent::class], modules = [ListModule::class])
 interface ListComponent {
     fun picasso(): Picasso
-    fun exoPlayer(): SimpleExoPlayer
     fun mediaDb(): MediaDb
     fun launchScheduleService(): MediaAPIService
     fun scheduler(): Scheduler
